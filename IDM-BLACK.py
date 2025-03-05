@@ -14,7 +14,6 @@ class DownloadManager:
         self.root.resizable(False, False)
         self.root.configure(bg="#d4d0c8")
         self.monitor_clipboard()
-        self.root.bind("<Control-y>", self.reset_app)
 
         self.file_size = 0
         self.downloaded = 0
@@ -57,29 +56,25 @@ class DownloadManager:
         self.btn_download.place(x=50, y=245)
         
         self.btn_pause = tk.Button(root, text="Pausar", command=self.pause_download, width=10)
-        self.btn_pause.place(x=150, y=245)
+        self.btn_pause.place(x=205, y=245)
         
         self.btn_cancel = tk.Button(root, text="Cancelar", command=self.cancel_download, width=10, state=tk.DISABLED)
-        self.btn_cancel.place(x=250, y=245)
+        self.btn_cancel.place(x=360, y=245)
         
-        self.btn_delete = tk.Button(root, text="Eliminar Archivo", command=self.delete_file, width=15)
-        self.btn_delete.place(x=350, y=245)
-
         self.version_label = tk.Label(root, text="Versión 1.0.0", bg="#d4d0c8", font=("Tahoma", 8))
         self.version_label.place(x=420, y=280)  # Ajusta la posición según necesites
 
-
     def monitor_clipboard(self):
         try:
-             clipboard_content = self.root.clipboard_get()
-             if clipboard_content.startswith("http"):  # Verifica si es un enlace
-                 self.entry_url.delete(0, tk.END)
-                 self.entry_url.insert(0, clipboard_content)
+            if hasattr(self, "entry_url") and self.entry_url.winfo_exists():
+                clipboard_content = self.root.clipboard_get()
+                if clipboard_content.startswith("http"):
+                    self.entry_url.delete(0, tk.END)
+                    self.entry_url.insert(0, clipboard_content)
         except tk.TclError:
-            pass  # Puede fallar si el portapapeles está vacío o inaccesible
+            pass
 
-        self.root.after(1000, self.monitor_clipboard)  # Verifica cada segundo
-
+        self.root.after(1000, self.monitor_clipboard)
         
     def browse_location(self):
         folder_selected = filedialog.askdirectory()
@@ -155,19 +150,6 @@ class DownloadManager:
         self.is_cancelled = True
         self.btn_cancel.config(state=tk.DISABLED)
     
-    def delete_file(self):
-        file_path = self.entry_path.get()
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            print("Archivo eliminado")
-        else:
-            print("No hay archivo para eliminar")
-
-    def reset_app(self, event=None):
-        self.root.destroy()
-        python = sys.executable
-        os.execl(python, python, *sys.argv)
-
 if __name__ == "__main__":
     root = tk.Tk()
     app = DownloadManager(root)
